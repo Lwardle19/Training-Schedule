@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Backline — Defender Development Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --turf:#0E2118;
+    --turf-2:#132C20;
+    --turf-3:#1B3B29;
+    --line:#3E5A47;
+    --chalk:#F3F1E8;
+    --chalk-dim:#B9C3B9;
+    --amber:#E3A730;
+    --amber-dim:#8A6A28;
+    --miss:#C1543A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--turf);
+    color:var(--chalk);
+    font-family:'Work Sans',sans-serif;
+    padding:0 0 4rem;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 1.5rem;}
+  header{
+    padding:3rem 1.5rem 2rem;
+    text-align:center;
+    background:
+      linear-gradient(var(--turf-2),var(--turf-2)),
+      repeating-linear-gradient(90deg, transparent 0 78px, rgba(243,241,232,0.035) 78px 79px);
+    border-bottom:1px solid var(--line);
+  }
+  h1{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(2.4rem,7vw,4rem);
+    letter-spacing:2px;
+    margin:0;
+    color:var(--chalk);
+    line-height:0.95;
+  }
+  h1 span{color:var(--amber);}
+  .tagline{color:var(--chalk-dim);font-size:0.95rem;margin-top:0.6rem;letter-spacing:0.5px;}
+  .datebar{margin-top:1.2rem;font-size:0.85rem;color:var(--amber);text-transform:uppercase;letter-spacing:2px;}
+
+  section{margin-top:2.5rem;}
+  .eyebrow{
+    font-family:'Anton',sans-serif;
+    letter-spacing:1.5px;
+    font-size:0.8rem;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:0.8rem;
+  }
+
+  .backline{
+    display:flex;
+    gap:6px;
+    background:var(--turf-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.2rem 1rem;
+  }
+  .marker{
+    flex:1;
+    text-align:center;
+    border-radius:8px;
+    padding:0.7rem 0.2rem 0.5rem;
+    border:1px solid transparent;
+  }
+  .marker .dot{
+    width:34px;height:34px;border-radius:50%;
+    margin:0 auto 0.5rem;
+    background:var(--turf-3);
+    border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.75rem;font-weight:600;color:var(--chalk-dim);
+  }
+  .marker.full .dot{background:var(--amber);border-color:var(--amber);color:var(--turf);}
+  .marker.partial .dot{background:transparent;border-color:var(--amber);color:var(--amber);}
+  .marker.today{border-color:var(--amber-dim);}
+  .marker .lbl{font-size:0.7rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:1px;}
+  .marker.today .lbl{color:var(--amber);}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:1rem;}
+  .stat{background:var(--turf-2);border:1px solid var(--line);border-radius:10px;padding:1rem;text-align:center;}
+  .stat .num{font-family:'Anton',sans-serif;font-size:1.9rem;color:var(--amber);}
+  .stat .lbl{font-size:0.72rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+  .card{
+    background:var(--turf-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.3rem 1.4rem;
+    margin-bottom:1rem;
+  }
+  .card h3{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    letter-spacing:1px;
+    font-size:1.1rem;
+    margin:0 0 0.9rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .card h3 .tag{
+    font-family:'Work Sans',sans-serif;
+    font-size:0.68rem;
+    color:var(--chalk-dim);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+  .item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:0.55rem 0;
+    border-top:1px solid var(--line);
+    cursor:pointer;
+  }
+  .item:first-of-type{border-top:none;}
+  .item input{margin-top:3px;accent-color:var(--amber);width:16px;height:16px;cursor:pointer;}
+  .item label{cursor:pointer;font-size:0.95rem;line-height:1.4;}
+  .item.checked label{color:var(--chalk-dim);text-decoration:line-through;}
+  .item .sub{display:block;font-size:0.78rem;color:var(--chalk-dim);margin-top:2px;font-weight:400;}
+
+  textarea{
+    width:100%;
+    background:var(--turf-3);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--chalk);
+    font-family:'Work Sans',sans-serif;
+    font-size:0.9rem;
+    padding:0.7rem;
+    resize:vertical;
+    min-height:70px;
+  }
+  textarea:focus{outline:1px solid var(--amber);}
+
+  .goal-row{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-top:1px solid var(--line);}
+  .goal-row:first-of-type{border-top:none;}
+  .goal-row .g-label{font-size:0.92rem;}
+  .goal-row .g-target{color:var(--amber);font-size:0.85rem;}
+
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-day{
+    aspect-ratio:1;
+    border-radius:6px;
+    background:var(--turf-3);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.75rem;color:var(--chalk-dim);
+    cursor:pointer;
+    position:relative;
+  }
+  .cal-day:hover{border-color:var(--amber-dim);}
+  .cal-day.full{background:var(--amber);color:var(--turf);border-color:var(--amber);font-weight:600;}
+  .cal-day.partial{border-color:var(--amber);color:var(--amber);}
+  .cal-day.empty{visibility:hidden;cursor:default;}
+  .cal-day.selected{box-shadow:0 0 0 2px var(--chalk) inset;}
+  .cal-day .check{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--turf);color:var(--amber);border:1px solid var(--amber);font-size:0.55rem;display:flex;align-items:center;justify-content:center;}
+  .cal-head{font-size:0.65rem;color:var(--chalk-dim);text-align:center;text-transform:uppercase;letter-spacing:1px;}
+  .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;}
+  .cal-nav button{background:none;border:1px solid var(--line);color:var(--chalk);border-radius:6px;padding:0.3rem 0.7rem;cursor:pointer;font-size:0.85rem;}
+  .cal-nav button:hover{border-color:var(--amber);color:var(--amber);}
+  .cal-title{font-family:'Anton',sans-serif;letter-spacing:1px;font-size:1rem;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:1rem;}
+  .tabbtn{
+    background:var(--turf-2);
+    border:1px solid var(--line);
+    color:var(--chalk-dim);
+    border-radius:8px;
+    padding:0.5rem 1rem;
+    font-size:0.85rem;
+    cursor:pointer;
+    font-family:'Work Sans',sans-serif;
+  }
+  .tabbtn.active{border-color:var(--amber);color:var(--amber);}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
+  .snack{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0.6rem 0;
+    border-top:1px solid var(--line);
+  }
+  .snack:first-of-type{border-top:none;}
+  .snack .s-name{font-size:0.92rem;}
+  .snack .s-note{font-size:0.75rem;color:var(--chalk-dim);display:block;margin-top:1px;}
+
+  footer{text-align:center;color:var(--chalk-dim);font-size:0.75rem;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>THE <span>BACKLINE</span></h1>
+  <div class="tagline">Defender development tracker — mediocre to top, one day at a time</div>
+  <div class="datebar" id="todayLabel"></div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <div class="eyebrow">This week</div>
+    <div class="backline" id="backline"></div>
+    <div class="stats">
+      <div class="stat"><div class="num" id="streakNum">0</div><div class="lbl">Day streak</div></div>
+      <div class="stat"><div class="num" id="weekPct">0%</div><div class="lbl">Week complete</div></div>
+      <div class="stat"><div class="num" id="totalDays">0</div><div class="lbl">Full days logged</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow" id="checklistDateLabel">Today</div>
+
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="checklist">Daily checklist</button>
+      <button class="tabbtn" data-tab="snacks">Snack ideas</button>
+    </div>
+
+    <div class="tabpanel active" id="tab-checklist">
+      <div class="card">
+        <h3>Soccer <span class="tag" id="soccerTag">team practice today</span></h3>
+        <div id="soccerItems"></div>
+      </div>
+
+      <div class="card">
+        <h3>Home workout <span class="tag" id="workoutTag"></span></h3>
+        <div id="workoutItems"></div>
+      </div>
+
+      <div class="card">
+        <h3>School</h3>
+        <div id="schoolItems"></div>
+      </div>
+
+      <div class="card">
+        <h3>Eating well</h3>
+        <div id="eatingItems"></div>
+      </div>
+
+      <div class="card">
+        <h3>Notes</h3>
+        <textarea id="notesBox" placeholder="What worked today? What did your coach say? What felt off in the back line?"></textarea>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-snacks">
+      <div class="card">
+        <h3>Quick, easy, packable</h3>
+        <div id="snackList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Season goals</div>
+    <div class="card">
+      <div class="goal-row"><span class="g-label">1v1 defending confidence</span><span class="g-target">win the duel first</span></div>
+      <div class="goal-row"><span class="g-label">First touch under pressure</span><span class="g-target">clean out of the back</span></div>
+      <div class="goal-row"><span class="g-label">Positioning & reading the game</span><span class="g-target">step early, not late</span></div>
+      <div class="goal-row"><span class="g-label">Aerial duels</span><span class="g-target">win headers, both boxes</span></div>
+      <div class="goal-row"><span class="g-label">Recovery speed</span><span class="g-target">never beaten on the turn</span></div>
+      <div class="goal-row"><span class="g-label">Communication / organizing the line</span><span class="g-target">talk before the ball arrives</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Calendar</div>
+    <div class="card">
+      <div class="cal-nav">
+        <button id="prevMonth">&larr; prev</button>
+        <span class="cal-title" id="calTitle"></span>
+        <button id="nextMonth">next &rarr;</button>
+      </div>
+      <div style="text-align:center;font-size:0.8rem;color:var(--chalk-dim);margin-bottom:0.8rem;">Viewing checklist for <span id="viewingLabel" style="color:var(--amber);"></span></div>
+      <div class="calendar" id="calHead"></div>
+      <div class="calendar" id="calGrid" style="margin-top:6px;"></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>Data is saved to your account and stays private to you.</footer>
+
+<script>
+const SOCCER_WEEKDAY = [
+  {t:"Team practice (2 hrs)", s:"the main session — coach-led"},
+  {t:"Ball mastery session", s:"15-30 min, before or after practice"},
+  {t:"Freestyle juggling", s:"quick reps, touches on both feet"}
+];
+const SOCCER_WEEKEND = [
+  {t:"Ball mastery session", s:"15-30 min"},
+  {t:"Freestyle juggling", s:"build the streak"},
+  {t:"1v1 defending shadow reps", s:"jockeying, tackle timing, no ball needed"},
+  {t:"Watch one defender clip", s:"note one thing to try next practice"}
+];
+
+const WORKOUT_WEEKDAY = [
+  {t:"Core circuit", s:"10 min — legs are already cooked from practice"},
+  {t:"Foam roll + stretch", s:"5-10 min recovery, hips and hamstrings"}
+];
+const WORKOUT_WEEKEND = [
+  {t:"Strength: squats, lunges, core", s:"20-30 min, bodyweight"},
+  {t:"Speed & agility", s:"sprints, cone drills, footwork ladder"},
+  {t:"Foam roll + stretch", s:"10 min recovery"}
+];
+
+const SCHOOL = [
+  {t:"Homework / assignments done", s:""},
+  {t:"Study or review, 20+ min", s:""},
+  {t:"Pack bag & gear for tomorrow", s:""}
+];
+
+const EATING = [
+  {t:"Make a healthy lunch for school tomorrow", s:"pack it tonight, grab and go"},
+  {t:"Hit water goal — 90 oz (about 11 cups)", s:"more if it's hot or a heavy practice day"},
+  {t:"Protein at every meal today", s:""}
+];
+
+const SNACKS = [
+  {n:"Greek yogurt + berries", note:"grab a cup, no prep"},
+  {n:"Apple + peanut butter packet", note:"slice ahead if you have time"},
+  {n:"Trail mix (nuts, seeds, dried fruit)", note:"portion into bags on Sunday"},
+  {n:"String cheese + whole grain crackers", note:"zero prep"},
+  {n:"Hard-boiled eggs", note:"boil a batch, keep in fridge all week"},
+  {n:"Banana + almond butter", note:"quick pre-practice fuel"},
+  {n:"Hummus + baby carrots", note:"pre-portion into small containers"},
+  {n:"Protein shake or smoothie", note:"blend the night before, keep cold"},
+  {n:"Rice cakes + turkey slices", note:"good post-practice combo"},
+  {n:"Overnight oats", note:"set it up before bed, ready by morning"}
+];
+
+function dateKey(d){ return d.toISOString().slice(0,10); }
+function todayKey(){ return dateKey(new Date()); }
+function isWeekday(d){ const day = d.getDay(); return day>=1 && day<=5; }
+
+let cache = {};
+let viewDate = new Date();
+let selectedDate = new Date();
+
+async function loadDay(key){
+  if(cache[key]) return cache[key];
+  try{
+    const res = await window.storage.get('day:'+key);
+    cache[key] = res ? JSON.parse(res.value) : {soccer:[],workout:[],school:[],eating:[],notes:''};
+  }catch(e){
+    cache[key] = {soccer:[],workout:[],school:[],eating:[],notes:''};
+  }
+  return cache[key];
+}
+
+async function saveDay(key, data){
+  cache[key] = data;
+  try{ await window.storage.set('day:'+key, JSON.stringify(data)); }catch(e){ console.error('save failed', e); }
+}
+
+function listFor(field, weekday){
+  if(field==='soccer') return weekday ? SOCCER_WEEKDAY : SOCCER_WEEKEND;
+  if(field==='workout') return weekday ? WORKOUT_WEEKDAY : WORKOUT_WEEKEND;
+  if(field==='school') return SCHOOL;
+  if(field==='eating') return EATING;
+}
+
+function dayCompletion(data, weekday){
+  const total = listFor('soccer',weekday).length + listFor('workout',weekday).length + SCHOOL.length + EATING.length;
+  const done = (data.soccer||[]).length + (data.workout||[]).length + (data.school||[]).length + (data.eating||[]).length;
+  return total ? done/total : 0;
+}
+
+function renderChecklist(containerId, list, data, field){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  list.forEach((entry,i)=>{
+    const checked = (data[field]||[]).includes(i);
+    const row = document.createElement('div');
+    row.className = 'item' + (checked?' checked':'');
+    row.innerHTML = `<input type="checkbox" id="${field}-${i}" ${checked?'checked':''}><label for="${field}-${i}">${entry.t}${entry.s?`<span class="sub">${entry.s}</span>`:''}</label>`;
+    row.querySelector('input').addEventListener('change', async (e)=>{
+      const key = dateKey(selectedDate);
+      const d = await loadDay(key);
+      const arr = new Set(d[field]||[]);
+      if(e.target.checked) arr.add(i); else arr.delete(i);
+      d[field] = Array.from(arr);
+      await saveDay(key, d);
+      row.classList.toggle('checked', e.target.checked);
+      refreshBackline();
+      refreshCalendar();
+    });
+    el.appendChild(row);
+  });
+}
+
+async function loadChecklistForSelected(){
+  const key = dateKey(selectedDate);
+  const weekday = isWeekday(selectedDate);
+  const d = await loadDay(key);
+
+  document.getElementById('soccerTag').textContent = weekday ? 'team practice today' : 'no team practice';
+  document.getElementById('workoutTag').textContent = weekday ? 'lighter — practice day' : 'full session';
+
+  renderChecklist('soccerItems', listFor('soccer',weekday), d, 'soccer');
+  renderChecklist('workoutItems', listFor('workout',weekday), d, 'workout');
+  renderChecklist('schoolItems', SCHOOL, d, 'school');
+  renderChecklist('eatingItems', EATING, d, 'eating');
+  document.getElementById('notesBox').value = d.notes || '';
+
+  const now = new Date();
+  const isToday = dateKey(selectedDate) === dateKey(now);
+  document.getElementById('checklistDateLabel').textContent = isToday
+    ? 'Today — ' + selectedDate.toLocaleDateString('default',{weekday:'long'})
+    : selectedDate.toLocaleDateString('default',{weekday:'long', month:'long', day:'numeric'});
+}
+
+document.getElementById('notesBox').addEventListener('change', async (e)=>{
+  const key = dateKey(selectedDate);
+  const d = await loadDay(key);
+  d.notes = e.target.value;
+  await saveDay(key, d);
+});
+
+function renderSnacks(){
+  const el = document.getElementById('snackList');
+  el.innerHTML = '';
+  SNACKS.forEach(s=>{
+    const row = document.createElement('div');
+    row.className = 'snack';
+    row.innerHTML = `<div><span class="s-name">${s.n}</span><span class="s-note">${s.note}</span></div>`;
+    el.appendChild(row);
+  });
+}
+
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+async function refreshBackline(){
+  const el = document.getElementById('backline');
+  el.innerHTML = '';
+  const now = new Date();
+  const labels = ['S','M','T','W','T','F','S'];
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  let weekDone = 0, totalFull = 0;
+
+  for(let i=0;i<7;i++){
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate()+i);
+    const key = dateKey(d);
+    const data = await loadDay(key);
+    const pct = dayCompletion(data, isWeekday(d));
+    const marker = document.createElement('div');
+    let cls = 'marker';
+    if(dateKey(d)===dateKey(now)) cls += ' today';
+    if(pct >= 0.99) cls += ' full';
+    else if(pct > 0) cls += ' partial';
+    marker.className = cls;
+    marker.innerHTML = `<div class="dot">${d.getDate()}</div><div class="lbl">${labels[i]}</div>`;
+    el.appendChild(marker);
+    if(pct>=0.99) weekDone++;
+  }
+
+  let streak = 0;
+  let cursor = new Date();
+  while(true){
+    const key = dateKey(cursor);
+    const data = await loadDay(key);
+    if(dayCompletion(data, isWeekday(cursor)) >= 0.99){ streak++; cursor.setDate(cursor.getDate()-1); }
+    else break;
+  }
+
+  try{
+    const list = await window.storage.list('day:');
+    if(list && list.keys){
+      for(const k of list.keys){
+        const dk = k.replace('day:','');
+        const data = await loadDay(dk);
+        if(dayCompletion(data, isWeekday(new Date(dk)))>=0.99) totalFull++;
+      }
+    }
+  }catch(e){}
+
+  document.getElementById('streakNum').textContent = streak;
+  document.getElementById('weekPct').textContent = Math.round((weekDone/7)*100) + '%';
+  document.getElementById('totalDays').textContent = totalFull;
+}
+
+function renderCalHead(){
+  const el = document.getElementById('calHead');
+  el.innerHTML = '';
+  ['S','M','T','W','T','F','S'].forEach(d=>{
+    const h = document.createElement('div');
+    h.className='cal-head';
+    h.textContent=d;
+    el.appendChild(h);
+  });
+}
+
+async function refreshCalendar(){
+  const el = document.getElementById('calGrid');
+  el.innerHTML = '';
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  document.getElementById('calTitle').textContent = viewDate.toLocaleString('default',{month:'long',year:'numeric'});
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  for(let i=0;i<firstDay;i++){
+    const empty = document.createElement('div');
+    empty.className='cal-day empty';
+    el.appendChild(empty);
+  }
+  for(let day=1; day<=daysInMonth; day++){
+    const d = new Date(year, month, day);
+    const key = dateKey(d);
+    const data = await loadDay(key);
+    const pct = dayCompletion(data, isWeekday(d));
+    const cell = document.createElement('div');
+    let cls = 'cal-day';
+    if(pct>=0.99) cls+=' full'; else if(pct>0) cls+=' partial';
+    if(dateKey(d)===dateKey(selectedDate)) cls+=' selected';
+    cell.className = cls;
+    cell.textContent = day;
+    if(pct>=0.99){
+      const check = document.createElement('span');
+      check.className = 'check';
+      check.textContent = '✓';
+      cell.appendChild(check);
+    }
+    cell.addEventListener('click', async ()=>{
+      selectedDate = d;
+      await loadChecklistForSelected();
+      refreshCalendar();
+      document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+      document.querySelector('[data-tab="checklist"]').classList.add('active');
+      document.getElementById('tab-checklist').classList.add('active');
+      document.getElementById('checklistDateLabel').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    el.appendChild(cell);
+  }
+  document.getElementById('viewingLabel').textContent = selectedDate.toLocaleDateString('default',{weekday:'long', month:'short', day:'numeric'});
+}
+
+document.getElementById('prevMonth').addEventListener('click', ()=>{
+  viewDate.setMonth(viewDate.getMonth()-1);
+  refreshCalendar();
+});
+document.getElementById('nextMonth').addEventListener('click', ()=>{
+  viewDate.setMonth(viewDate.getMonth()+1);
+  refreshCalendar();
+});
+
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('default',{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+renderCalHead();
+loadChecklistForSelected();
+renderSnacks();
+refreshBackline();
+refreshCalendar();
+</script>
+
+</body>
+</html>
